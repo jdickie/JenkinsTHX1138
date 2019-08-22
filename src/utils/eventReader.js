@@ -9,7 +9,6 @@ class eventReader {
             if (!json.event) {
                 console.log("found no event type inside json body", json);
             }
-            console.log("Reader received eventJSON");
             const eventBody = json.event;
             switch (eventBody.type) {
                 case "app_mention":

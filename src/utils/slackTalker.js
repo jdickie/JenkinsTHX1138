@@ -9,8 +9,11 @@ class slackTalker {
         rp({
             url: url,
             method: "POST",
-            form: {
-               token: token,
+            json: true,
+            headers: {
+                Authorization: "Bearer " + token
+            },
+            body: {
                channel: channel,
                text: message.replace(" ", "%20")
             }
