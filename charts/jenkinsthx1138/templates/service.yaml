@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "jenkinsthx1138.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "jenkinsthx1138.name" . }}
+    helm.sh/chart: {{ include "jenkinsthx1138.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: api
+      protocol: TCP
+      name: apisvc
+  selector:
+    app.kubernetes.io/name: {{ include "jenkinsthx1138.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

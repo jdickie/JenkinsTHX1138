@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: jenkinsthx
+    volumes:
+      - ".:/application"
+    working_dir: "/application"
+    command: ["npm", "run", "dev"]
+    ports:
+      - "3000:3000"

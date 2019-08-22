@@ -1,0 +1,25 @@
+apiVersion: skaffold/v1beta3
+kind: Config
+build:
+  artifacts:
+  - image: jenkinsthx1138
+    context: .
+    docker:
+      dockerfile: Dockerfile
+  tagPolicy:
+    envTemplate:
+      template: '{{.ECR}}/{{.IMAGE_NAME}}:{{.VERSION}}'
+  local: {}
+deploy:
+  helm:
+    releases:
+    - name: jenkinsthx-prod
+      chartPath: charts/jenkinsthx1138
+      namespace: jenkinsthx
+      setValueTemplates:
+        image.repository: '{{.ECR}}/jenkinsthx1138'
+        image.tag: '{{.VERSION}}'
+        ingress.enabled: true
+        ingress.hosts:
+          - host: '{{.INGRESS_HOSTNAME}}'
+            paths: [ "/" ]

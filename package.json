@@ -1,0 +1,29 @@
+{
+  "name": "jenkinsthx1138",
+  "version": "0.0.1",
+  "description": "Slack bot that will connect to on-prem Jenkins instances and provide information back to users.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm install --depth=0 && node app.js",
+    "dev": "npm install && nodemon app.js"
+  },
+  "keywords": [
+    "Slack",
+    "Slackbot",
+    "Jenkins"
+  ],
+  "author": "gdickie",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.515.0",
+    "config": "^3.2.2",
+    "express": "^4.17.1",
+    "jenkins": "^0.26.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  }
+}
