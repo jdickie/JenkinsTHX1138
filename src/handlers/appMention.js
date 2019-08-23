@@ -2,9 +2,11 @@ var slackTalker = require(__dirname + "/../utils/slackTalker");
 var jenkinsinstance = require(__dirname + "/../jenkins/jenkinsinstance");
 var helpMessage = require(__dirname + "/helpMessage");
 
-const jobDataRegex = /info jobs[\s]*([A-z\-]+)\b/;
+const jobListRegex = /list jobs[\s]*([A-z\-]+)\b/;
+const jobInfoRegex = /info job[\s]*([A-z\-]+)\b/;
 const helpRegex = /\bhelp\b/;
 const JOB_INTENT = "JOB_DATA";
+const LIST_INTENT = "LIST_INTENT";
 const HELP_INTENT = 'HELP_INTENT';
 class appMention {
     constructor() {}
@@ -14,7 +16,6 @@ class appMention {
         let eventJSON = json.event;
         const channel = eventJSON.channel;
         this.determineIntent(eventJSON.text).then(intent => {
-            console.log('info intent', intent);
             if (intent === null) {
                 slackTalker.sendTextToChannel(channel, 
                     "Sorry, I'm not programmed to understand that.\nLet me get you my instructions...")
@@ -22,8 +23,8 @@ class appMention {
                 return;
             }
             switch(intent.intent) {
-                case JOB_INTENT:
-                    slackTalker.sendJobData(intent.servername, intent.data, channel);
+                case LIST_INTENT:
+                    slackTalker.sendJobOptions(intent.servername, intent.data, channel);
                     break;
                 case HELP_INTENT:
                 default:
@@ -34,7 +35,7 @@ class appMention {
     }
 
     async determineIntent(userMessage) {
-        let results = userMessage.match(jobDataRegex);
+        let results = userMessage.match(jobListRegex);
         if (results !== null && results.length) {
             console.log(`Searching for ${results[1]}`);
             const instance = new jenkinsinstance(results[1]);
@@ -45,7 +46,7 @@ class appMention {
             const jobData = await instance.getServerJobList();
             console.log('info', jobData);
             return {
-                intent: JOB_INTENT,
+                intent: LIST_INTENT,
                 servername: results[1],
                 data: jobData
             }

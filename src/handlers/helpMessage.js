@@ -5,8 +5,8 @@ var slackTalker = require(__dirname + "/../utils/slackTalker");
  */
 const availableCommands = [
     {
-        key: "`info jobs <server>`",
-        value: "Scrapes some information from a given server e.g. `info jobs jenkins`"
+        key: "`list jobs <server>`",
+        value: "Provides available options to choose from to get more info about jobs. e.g. `list jobs jenkins`"
     },
     {
         key: "`help`",
