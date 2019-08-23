@@ -15,11 +15,10 @@ deploy:
     releases:
     - name: jenkinsthx-prod
       chartPath: charts/jenkinsthx1138
+      valuesFiles:
+      - charts/jenkinsthx1138/values.yaml
+      - charts/jenkinsthx1138/overrides.yaml
       namespace: jenkinsthx
       setValueTemplates:
         image.repository: '{{.ECR}}/jenkinsthx1138'
         image.tag: '{{.VERSION}}'
-        ingress.enabled: true
-        ingress.hosts:
-          - host: '{{.INGRESS_HOSTNAME}}'
-            paths: [ "/" ]
