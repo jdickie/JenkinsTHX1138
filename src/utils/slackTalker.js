@@ -3,6 +3,10 @@ var rp = require('request-promise');
 const baseUrl = "https://slack.com/api/";
 
 class slackTalker {
+    /**
+     * @param {string} channel 
+     * @param {string} message 
+     */
     async sendMessageToChannel(channel, message) {
         if (!message.channel) {
             message.channel = channel;
@@ -45,6 +49,44 @@ class slackTalker {
         this.sendMessageToChannel(channel, message);
     }
 
+    sendJobOptions(name, data, channel) {
+        let staticOptions = []
+        for (const job of data) {
+            staticOptions.push({
+                text: {
+                    type: 'plain_text',
+                    text: job.key
+                },
+                value: `${name}|${job.value}`
+            });
+        }
+        let message = {
+            text: `Which job on ${name} do you want info on?`,
+            blocks: [
+                {
+                    type: 'section',
+                    block_id: "joblist",
+                    text: {
+                        type: "plain_text",
+                        text: `What job from ${name} do you want more info on? I can check out the following:`
+                    },
+                    accessory: {
+                        action_id: "pickajob",
+                        type: "static_select",
+                        placeholder: {
+                            type: 'plain_text',
+                            text: "Pick a job name,\nI'll come back with data."
+                        },
+                        options: staticOptions
+                    }
+                }
+            ]
+        }
+        
+
+        this.sendMessageToChannel(channel, message);
+    }
+
     sendJobData(name, data, channel) {
         let message = {
             text: `Job information from *${name}*`,
@@ -73,7 +115,6 @@ class slackTalker {
             }
         }
         block.fields = [];
-        console.log('info', fields);
         for (const field of fields) {
             block.fields.push({
                 type: "mrkdwn",
@@ -87,8 +128,14 @@ class slackTalker {
         return block;
     }
 
-    createButton() {
-        
+    createButton(title) {
+        var button = {
+            type: 'button',
+            text: {
+                type: "plain_text",
+                text: title
+            }
+        }
     }
 }
 

@@ -38,17 +38,10 @@ class jenkinsinstance {
         let list = [];
         var jobs = Config.get(`jenkins.${this.serverName}.jobs`);
         for (const job of jobs) {
-            console.log(`retrieving data for ${job.displayName}`);
-            var data = await self.getJobInfo(job.path);
             list.push({
-                "key": "Job",
-                "value": `*${data.displayName}*`
+                key: job.displayName,
+                value: job.path
             });
-            list.push({
-                "key": `Last Build : ${data.lastBuild.number}`,
-                "value": `<${data.lastBuild.url}|Go to Build Page on ${this.serverName}>`
-            });
-            console.log('info', JSON.stringify(list));
         }
         return list;
     }
@@ -63,7 +56,7 @@ class jenkinsinstance {
                 }
                 resolve(data);
             });
-        })
+        });
     }
 }
 
