@@ -15,6 +15,24 @@ class interactiveRoutes {
             next()
         }
     }
+
+    routeInteractionTest(req, res, next) {
+        res.status(200);
+        interactiveHandler.handleInteraction({
+            channel: {
+                id: "CJS8VKWJY"
+            },
+            actions: [
+                {
+                    action_id: 'pickajob',
+                    selected_option: {
+                        value: 'jenkins|Stage1/Build_And_Deploy_Seamus'
+                    }
+                }
+            ]
+        });
+        next();
+    }
 }
 
 module.exports = new interactiveRoutes();

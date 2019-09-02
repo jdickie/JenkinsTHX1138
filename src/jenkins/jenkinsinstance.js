@@ -8,7 +8,10 @@ class jenkinsinstance {
      */
     constructor(name) {
         try {
-            let url = Config.get(`jenkins.${name}.url`);
+            this.hostname = Config.get(`jenkins.${name}.hostname`);
+            const user = Config.get(`jenkins.${name}.user`);
+            const password = Config.get(`jenkins.${name}.password`);
+            let url = `http://${user}:${password}@${this.hostname}`;
             this.serverName = name;
             this.jenkinsInstance = jenkins({
                 baseUrl: url
@@ -18,6 +21,10 @@ class jenkinsinstance {
             console.log("Error", e);
             return null;
         }
+    }
+
+    getJenkinsBaseUrl() {
+        return `http://${this.hostname}`;
     }
 
     logInfo() {
@@ -49,6 +56,7 @@ class jenkinsinstance {
     getJobInfo(jobPath) {
         var self = this;
         return new Promise(function(resolve, reject) {
+            console.log(`Checking job info for ${jobPath}`);
             self.jenkinsInstance.job.get(jobPath, function(err, data) {
                 if (err) {
                     console.log("Error", err);
@@ -56,6 +64,19 @@ class jenkinsinstance {
                 }
                 resolve(data);
             });
+        });
+    }
+
+    getBuildInfo(jobPath, buildNumber) {
+        var self = this;
+        return new Promise(function(resolve, reject) {
+           self.jenkinsInstance.build.get(jobPath, buildNumber, function(err, data) {
+               if (err) {
+                   console.log("Error", err);
+                   reject(err);
+               }
+               resolve(data);
+           });
         });
     }
 }

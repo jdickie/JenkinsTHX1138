@@ -16,6 +16,7 @@ app.get('/status', statusRoutes.getStatus);
 app.post('/events', eventRoutes.postRoute);
 // for handling Interactions
 app.post('/interactive', interactive.routeInteraction);
+app.get('/interactive_test', interactive.routeInteractionTest);
 
 
 app.listen(3000);

@@ -38,10 +38,28 @@ class interactive {
             "key": "Job",
             "value": `*${data.displayName}*`
         });
+        const lastBuildData = await instance.getBuildInfo(jobPath, data.lastBuild.number);
+
         list.push({
             "key": `Last Build : ${data.lastBuild.number}`,
-            "value": `<${data.lastBuild.url}|Go to Build Page on ${this.serverName}>`
+            "value": `<${data.lastBuild.url}|Go to Build Page on ${servername}>\nResult: ${lastBuildData.result}`
         });
+        const timestampRaw = new Date(lastBuildData.timestamp * 1000);
+        let extraInfo = `*Time started*:\n ${timestampRaw.getHours()}:${timestampRaw.getMinutes()}:${timestampRaw.getSeconds()}`;
+
+        if(lastBuildData.subBuilds) {
+            extraInfo += "\nJobs called by this job:\n";
+            lastBuildData.subBuilds.forEach(subB => {
+                const subBUrl = `${instance.getJenkinsBaseUrl()}/${subB.url}`;
+                extraInfo += `<${subBUrl}|${subB.jobName}> Result: ${subB.result}\n`;
+            });
+            list.push({
+                "key": 'More info',
+                "value": extraInfo
+            });
+        }
+        
+        console.log("To slack:", JSON.stringify(list));
         slackTalker.sendJobData(servername, list, channel);
     }
 }
