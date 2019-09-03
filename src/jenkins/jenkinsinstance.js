@@ -41,14 +41,31 @@ class jenkinsinstance {
      * Return back a list of keyword-named jobs that are set up in the config.
      */
     async getServerJobList() {
-        var self = this;
+        const self = this;
         let list = [];
-        var jobs = Config.get(`jenkins.${this.serverName}.jobs`);
+        var jobs = Config.get(`jenkins.jobs`);
         for (const job of jobs) {
-            list.push({
-                key: job.displayName,
-                value: job.path
-            });
+            if (job.server === self.serverName) {
+                list.push({
+                    key: `Server: ${job.server}\nEnvironment: ${job.env}\nName: ${job.displayName}`,
+                    value: job.path
+                });
+            }
+        }
+        return list;
+    }
+
+    searchGroups(group) {
+        const self = this, 
+        jobs = Config.get('jenkins.jobs');
+        let list = [];
+        for (const job of jobs) {
+            if (job.groups.includes(group)) {
+                list.push({
+                    key: job.displayName,
+                    value: job.path
+                });
+            }
         }
         return list;
     }

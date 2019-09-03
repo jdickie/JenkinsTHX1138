@@ -16,6 +16,7 @@ class interactive {
             console.log('info: parsing action', JSON.stringify(action));
             switch(action.action_id) {
                 case 'pickajob':
+                    slackTalker.sendTextToChannel(channel, "Fetching job info...\n");
                     this.jobInfo(channel, action.selected_option.value);
                     break;
                 default:
@@ -62,6 +63,8 @@ class interactive {
         console.log("To slack:", JSON.stringify(list));
         slackTalker.sendJobData(servername, list, channel);
     }
+
+    
 }
 
 module.exports = new interactive();

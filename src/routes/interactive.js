@@ -5,10 +5,9 @@ class interactiveRoutes {
             const payload = JSON.parse(req.body['payload']);
             // Have to respond to slack right away and then send back responses
             // later. We have a response_callback uri to use for the latter.
-            res.status(204);
+            res.status(200);
             next();
             interactiveHandler.handleInteraction(payload);
-            
         } else {
             console.log('Invalid interaction request made');
             res.status(500);
@@ -17,6 +16,11 @@ class interactiveRoutes {
     }
 
     routeInteractionTest(req, res, next) {
+        if (!req.body.token || req.body.token !== "test") {
+            res.status(500);
+            next();
+            return;
+        }
         res.status(200);
         interactiveHandler.handleInteraction({
             channel: {

@@ -3,11 +3,12 @@ var jenkinsinstance = require(__dirname + "/../jenkins/jenkinsinstance");
 var helpMessage = require(__dirname + "/helpMessage");
 
 const jobListRegex = /list jobs[\s]*([A-z\-]+)\b/;
-const jobInfoRegex = /info job[\s]*([A-z\-]+)\b/;
+const jobSearchRegex = /find job[\s]+(.*)/;
 const helpRegex = /\bhelp\b/;
 const JOB_INTENT = "JOB_DATA";
 const LIST_INTENT = "LIST_INTENT";
 const HELP_INTENT = 'HELP_INTENT';
+const SEARCH_INTENT = 'SEARCH_INTENT';
 class appMention {
     constructor() {}
 
@@ -18,7 +19,7 @@ class appMention {
         this.determineIntent(eventJSON.text).then(intent => {
             if (intent === null) {
                 slackTalker.sendTextToChannel(channel, 
-                    "Sorry, I'm not programmed to understand that.\nLet me get you my instructions...")
+                    "Sorry, I didn't understand that.\nLet me get you my instructions...\n\n")
                 helpMessage.helpMessage(channel);
                 return;
             }
@@ -26,6 +27,8 @@ class appMention {
                 case LIST_INTENT:
                     slackTalker.sendJobOptions(intent.servername, intent.data, channel);
                     break;
+                case SEARCH_INTENT:
+
                 case HELP_INTENT:
                 default:
                     helpMessage.helpMessage(channel);
@@ -37,7 +40,6 @@ class appMention {
     async determineIntent(userMessage) {
         let results = userMessage.match(jobListRegex);
         if (results !== null && results.length) {
-            console.log(`Searching for ${results[1]}`);
             const instance = new jenkinsinstance(results[1]);
             if (instance === null) {
                 console.log("Jenkinsinstance returned null");
@@ -51,6 +53,13 @@ class appMention {
                 data: jobData
             }
         }
+        results = userMessage.match(jobSearchRegex);
+        if (results !== null && results.length) {
+            return {
+                intent: SEARCH_INTENT,
+                jobToFind: results[1]
+            }
+        }
         results = userMessage.match(helpRegex);
         if (results !== null && results.length) {
             return {
@@ -58,6 +67,19 @@ class appMention {
             }
         }
         return null;
+    }
+
+
+    /**
+     * Uses searchText to look for groups, servers, or job names
+     * @param {string} searchText 
+     */
+    searchJob(searchText) {
+        const instance = new jenkinsinstance('jenkins');
+        const foundGroups = instance.searchGroups(searchText);
+        if (foundGroups.length) {
+            
+        }
     }
 }
 
