@@ -7,13 +7,34 @@ class slackTalker {
      * @param {string} channel 
      * @param {string} message 
      */
-    async sendMessageToChannel(channel, message) {
+    async sendMessageToChannel(channel, message, user) {
+        const token = Config.get('slack.token');
         if (!message.channel) {
             message.channel = channel;
         }
-        var url = baseUrl + "chat.postMessage";
-        var token = Config.get('slack.token');
-        await this.sendMessage(message, url, token);
+        if (user) {
+            message.user = user;
+            this.sendMessage(message, `${baseUrl}chat.postEphermeral`, token);
+        } else {
+            this.sendMessage(message, `${baseUrl}chat.postMessage`, token);
+        }
+    }
+
+    sendMessageToUser(message, url, token, user) {
+        return rp({
+            url: url,
+            method: "POST",
+            json: true,
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json; charset=utf-8'
+            },
+            body: message
+        }).then(function(response) {
+            console.log("info", response);
+        }).catch(function(err) {
+            console.log("Error", err);
+        });
     }
 
     sendMessage(message, url, token) {
@@ -33,6 +54,17 @@ class slackTalker {
         });
     }
     
+    sendMessageToUser(text, channel, user) {
+        const token = Config.get('slack.token');
+
+        this.sendMessage({
+            text: text,
+            channel: channel,
+            user: user
+        }, `${baseUrl}chat.postEphermeral`, token);
+
+    }
+
     sendTextToChannel(channel, text) {
         this.sendMessageToChannel(channel, {
             text: text
@@ -49,7 +81,7 @@ class slackTalker {
         this.sendMessageToChannel(channel, message);
     }
 
-    sendJobOptions(name, data, channel) {
+    sendJobOptions(data, channel, user) {
         let staticOptions = []
         for (const job of data) {
             staticOptions.push({
@@ -57,25 +89,25 @@ class slackTalker {
                     type: 'plain_text',
                     text: job.key
                 },
-                value: `${name}|${job.value}`
+                value: `${job.server}|${job.value}`
             });
         }
         let message = {
-            text: `Which job on ${name} do you want info on?`,
+            text: "Here's a list of jobs found",
             blocks: [
                 {
                     type: 'section',
                     block_id: "joblist",
                     text: {
                         type: "plain_text",
-                        text: `What job from ${name} do you want more info on? I can check out the following:`
+                        text: 'Searched around and found the following.\nPick a job to get more info:'
                     },
                     accessory: {
                         action_id: "pickajob",
                         type: "static_select",
                         placeholder: {
                             type: 'plain_text',
-                            text: "Pick a job name,\nI'll come back with data."
+                            text: "Pick a job"
                         },
                         options: staticOptions
                     }
@@ -83,8 +115,7 @@ class slackTalker {
             ]
         }
         
-
-        this.sendMessageToChannel(channel, message);
+        this.sendMessageToChannel(channel, message, user);
     }
 
     sendJobData(name, data, channel) {

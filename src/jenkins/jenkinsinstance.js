@@ -8,9 +8,9 @@ class jenkinsinstance {
      */
     constructor(name) {
         try {
-            this.hostname = Config.get(`jenkins.${name}.hostname`);
-            const user = Config.get(`jenkins.${name}.user`);
-            const password = Config.get(`jenkins.${name}.password`);
+            this.hostname = Config.get(`jenkins.servers.${name}.hostname`);
+            const user = Config.get(`jenkins.servers.${name}.user`);
+            const password = Config.get(`jenkins.servers.${name}.password`);
             let url = `http://${user}:${password}@${this.hostname}`;
             this.serverName = name;
             this.jenkinsInstance = jenkins({
@@ -48,7 +48,8 @@ class jenkinsinstance {
             if (job.server === self.serverName) {
                 list.push({
                     key: `Server: ${job.server}\nEnvironment: ${job.env}\nName: ${job.displayName}`,
-                    value: job.path
+                    value: job.path,
+                    server: job.server
                 });
             }
         }
@@ -60,14 +61,31 @@ class jenkinsinstance {
         jobs = Config.get('jenkins.jobs');
         let list = [];
         for (const job of jobs) {
-            if (job.groups.includes(group)) {
+            let groups = job.groups.join(" ");
+            if (groups.indexOf(group) >= 0) {
                 list.push({
-                    key: job.displayName,
-                    value: job.path
+                    key: `Server: ${job.server}\nEnvironment: ${job.env}\nName: ${job.displayName}`,
+                    value: job.path,
+                    server: job.server
                 });
             }
         }
         return list;
+    }
+
+    searchServers(server) {
+        const jobs = Config.get('jenkins.jobs');
+        let list = [];
+        for (const job of jobs) {
+            if (job.server.indexOf(server) >= 0) {
+                list.push({
+                    key: `Server: ${job.server}\nEnvironment: ${job.env}\nName: ${job.displayName}`,
+                    value: job.path,
+                    server: job.server
+                });
+            }
+        }
+        return list; 
     }
 
     getJobInfo(jobPath) {

@@ -3,9 +3,8 @@ var jenkinsinstance = require(__dirname + "/../jenkins/jenkinsinstance");
 var helpMessage = require(__dirname + "/helpMessage");
 
 const jobListRegex = /list jobs[\s]*([A-z\-]+)\b/;
-const jobSearchRegex = /find job[\s]+(.*)/;
+const jobSearchRegex = /.*\s(find|is)(.*)/;
 const helpRegex = /\bhelp\b/;
-const JOB_INTENT = "JOB_DATA";
 const LIST_INTENT = "LIST_INTENT";
 const HELP_INTENT = 'HELP_INTENT';
 const SEARCH_INTENT = 'SEARCH_INTENT';
@@ -13,7 +12,6 @@ class appMention {
     constructor() {}
 
     processMention(json) {
-        console.log("processMention called ", json);
         let eventJSON = json.event;
         const channel = eventJSON.channel;
         this.determineIntent(eventJSON.text).then(intent => {
@@ -25,10 +23,16 @@ class appMention {
             }
             switch(intent.intent) {
                 case LIST_INTENT:
-                    slackTalker.sendJobOptions(intent.servername, intent.data, channel);
+                    slackTalker.sendJobOptions(intent.data, channel, json.user);
                     break;
                 case SEARCH_INTENT:
-
+                    const data = this.searchJob(intent.jobToFind);
+                    if (!data) {
+                        slackTalker.sendTextToChannel("Sorry, didn't find anything", channel, json.user);
+                        return;
+                    }
+                    slackTalker.sendJobOptions(data, channel, json.user)
+                    break;
                 case HELP_INTENT:
                 default:
                     helpMessage.helpMessage(channel);
@@ -78,8 +82,13 @@ class appMention {
         const instance = new jenkinsinstance('jenkins');
         const foundGroups = instance.searchGroups(searchText);
         if (foundGroups.length) {
-            
+            return foundGroups;
+        } 
+        const foundServers = instance.searchServers(searchText);
+        if (foundServers.length) {
+            return foundServers;
         }
+        return null;
     }
 }
 
