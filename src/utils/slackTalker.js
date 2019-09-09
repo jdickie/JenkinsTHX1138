@@ -14,7 +14,7 @@ class slackTalker {
         }
         if (user) {
             message.user = user;
-            this.sendMessage(message, `${baseUrl}chat.postEphermeral`, token);
+            this.sendMessage(message, `${baseUrl}chat.postEphemeral`, token);
         } else {
             this.sendMessage(message, `${baseUrl}chat.postMessage`, token);
         }
@@ -38,6 +38,7 @@ class slackTalker {
     }
 
     sendMessage(message, url, token) {
+        console.log(`Sending to ${url}`);
         return rp({
             url: url,
             method: "POST",
@@ -114,7 +115,6 @@ class slackTalker {
                 }
             ]
         }
-        
         this.sendMessageToChannel(channel, message, user);
     }
 

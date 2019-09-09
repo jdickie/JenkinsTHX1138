@@ -57,14 +57,13 @@ class jenkinsinstance {
     }
 
     searchGroups(group) {
-        const self = this, 
-        jobs = Config.get('jenkins.jobs');
+        const jobs = Config.get('jenkins.jobs');
         let list = [];
         for (const job of jobs) {
             let groups = job.groups.join(" ");
-            if (groups.indexOf(group) >= 0) {
+            if (` ${groups}`.indexOf(group) >= 0) {
                 list.push({
-                    key: `Server: ${job.server}\nEnvironment: ${job.env}\nName: ${job.displayName}`,
+                    key: `${job.env} ${job.displayName}`,
                     value: job.path,
                     server: job.server
                 });

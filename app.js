@@ -9,16 +9,15 @@ var statusRoutes = new status();
 // Parsing application/json
 app.use(express.json());
 // Slack has mixed url-form-encoded values and other endpoints with JSON. Enabling x-www-form-urlencoded here
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true }));
+
 // Handles liveness and readiness probes for k8s
 app.get('/status', statusRoutes.getStatus);
 // for handling Events, including challenges
 app.post('/events', eventRoutes.postRoute);
 // for handling Interactions
 app.post('/interactive', interactive.routeInteraction);
-app.get('/interactive_test', interactive.routeInteractionTest);
 
 
 app.listen(3000);
-console.log("Listening on port 3000");
-console.log(__dirname);
+console.log("App ready to go...");

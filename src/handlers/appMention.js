@@ -13,7 +13,8 @@ class appMention {
 
     processMention(json) {
         let eventJSON = json.event;
-        const channel = eventJSON.channel;
+        const channel = eventJSON.channel,
+            user = eventJSON.user;
         this.determineIntent(eventJSON.text).then(intent => {
             if (intent === null) {
                 slackTalker.sendTextToChannel(channel, 
@@ -23,15 +24,15 @@ class appMention {
             }
             switch(intent.intent) {
                 case LIST_INTENT:
-                    slackTalker.sendJobOptions(intent.data, channel, json.user);
+                    slackTalker.sendJobOptions(intent.data, channel, user);
                     break;
                 case SEARCH_INTENT:
                     const data = this.searchJob(intent.jobToFind);
                     if (!data) {
-                        slackTalker.sendTextToChannel("Sorry, didn't find anything", channel, json.user);
+                        slackTalker.sendTextToChannel("Sorry, didn't find anything", channel, user);
                         return;
                     }
-                    slackTalker.sendJobOptions(data, channel, json.user)
+                    slackTalker.sendJobOptions(data, channel, user)
                     break;
                 case HELP_INTENT:
                 default:
@@ -61,7 +62,7 @@ class appMention {
         if (results !== null && results.length) {
             return {
                 intent: SEARCH_INTENT,
-                jobToFind: results[1]
+                jobToFind: results[2]
             }
         }
         results = userMessage.match(helpRegex);
