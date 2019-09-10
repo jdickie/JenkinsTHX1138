@@ -6,6 +6,8 @@ build:
     context: .
     docker:
       dockerfile: Dockerfile
+      buildArgs:
+        BUILDMODE: '--production'
   tagPolicy:
     envTemplate:
       template: '{{.ECR}}/{{.IMAGE_NAME}}:{{.VERSION}}'

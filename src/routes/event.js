@@ -1,4 +1,5 @@
-var eventReader = require(__dirname + "/../utils/eventReader");
+const eventReader = require(__dirname + "/../utils/eventReader"),
+signer = require(`${__dirname}/../utils/signer`);
 
 class eventRoutes {
     constructor() {}
@@ -13,6 +14,9 @@ class eventRoutes {
      */
     postRoute(req, res, next) {
         try {
+            if (!signer.verify(req)) {
+                throw new Error("Invalid signature deteced");
+            }
             let eventJSON = req.body;
 
             if (eventJSON.type === "url_verification") {
@@ -28,6 +32,7 @@ class eventRoutes {
             }
         } catch(e) {
             console.log("Error:", e);
+            next();
         }
         
     }
