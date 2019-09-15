@@ -1,40 +1,29 @@
-var Config = require('config');
-var rp = require('request-promise');
-const baseUrl = "https://slack.com/api/";
+var Config = require('config'),
+    { WebClient } = require('@slack/web-api'),
+    rp = require('request-promise');
+const baseUrl = "https://slack.com/api/",
+    SLACK_TOKEN = Config.get('slack.token');
+const web = new WebClient(SLACK_TOKEN);
 
+/**
+ * Uses the Slack Node SDK WebClient to broker messages to Slack. This doesn't
+ * require message signing.
+ */
 class slackTalker {
     /**
      * @param {string} channel 
      * @param {string} message 
      */
     async sendMessageToChannel(channel, message, user) {
-        const token = Config.get('slack.token');
         if (!message.channel) {
             message.channel = channel;
         }
         if (user) {
             message.user = user;
-            this.sendMessage(message, `${baseUrl}chat.postEphemeral`, token);
+            web.chat.postEphemeral(message);
         } else {
-            this.sendMessage(message, `${baseUrl}chat.postMessage`, token);
+            web.chat.postMessage(message);
         }
-    }
-
-    sendMessageToUser(message, url, token, user) {
-        return rp({
-            url: url,
-            method: "POST",
-            json: true,
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json; charset=utf-8'
-            },
-            body: message
-        }).then(function(response) {
-            console.log("info", response);
-        }).catch(function(err) {
-            console.log("Error", err);
-        });
     }
 
     sendMessage(message, url, token) {
@@ -54,20 +43,10 @@ class slackTalker {
             console.log("Error", err);
         });
     }
-    
-    sendMessageToUser(text, channel, user) {
-        const token = Config.get('slack.token');
-
-        this.sendMessage({
-            text: text,
-            channel: channel,
-            user: user
-        }, `${baseUrl}chat.postEphermeral`, token);
-
-    }
 
     sendTextToChannel(channel, text) {
-        this.sendMessageToChannel(channel, {
+        web.chat.postMessage({
+            channel: channel,
             text: text
         });
     }

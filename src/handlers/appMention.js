@@ -11,8 +11,7 @@ const SEARCH_INTENT = 'SEARCH_INTENT';
 class appMention {
     constructor() {}
 
-    processMention(json) {
-        let eventJSON = json.event;
+    processMention(eventJSON) {
         const channel = eventJSON.channel,
             user = eventJSON.user;
         this.determineIntent(eventJSON.text).then(intent => {
