@@ -26,45 +26,49 @@ class interactive {
         }
     }
 
-    async jobInfo(channel, value) {
-        // Value should be <servername>|job path
-        const pieces = value.match(/([A-z\-]+)\|(.*)/);
-        const servername = pieces[1];
-        const jobPath = pieces[2];
-        console.log(`server: ${servername} path: ${jobPath}`);
-        const instance = new jenkinsinstance(servername);
-        const data = await instance.getJobInfo(jobPath); 
-        let list = [];
-        list.push({
-            "key": "Job",
-            "value": `*${data.displayName}*`
-        });
-        const lastBuildData = await instance.getBuildInfo(jobPath, data.lastBuild.number);
+    jobInfo(channel, value) {
+        return new Promise((resolve, reject) => {
+            try {
+                // Value should be <servername>|job path
+                const pieces = value.match(/([A-z\-]+)\|(.*)/);
+                const servername = pieces[1];
+                const jobPath = pieces[2];
 
-        list.push({
-            "key": `Last Build : ${data.lastBuild.number}`,
-            "value": `<${data.lastBuild.url}|Go to Build Page on ${servername}>\nResult: ${lastBuildData.result}`
-        });
-        const timestampRaw = new Date(lastBuildData.timestamp * 1000);
-        let extraInfo = `*Time started*:\n ${timestampRaw.getHours()}:${timestampRaw.getMinutes()}:${timestampRaw.getSeconds()}`;
+                const instance = new jenkinsinstance(servername);
+                const data = await instance.getJobInfo(jobPath); 
+                let list = [];
+                list.push({
+                    "key": "Job",
+                    "value": `*${data.displayName}*`
+                });
+                const lastBuildData = await instance.getBuildInfo(jobPath, data.lastBuild.number);
 
-        if(lastBuildData.subBuilds) {
-            extraInfo += "\nJobs called by this job:\n";
-            lastBuildData.subBuilds.forEach(subB => {
-                const subBUrl = `${instance.getJenkinsBaseUrl()}/${subB.url}`;
-                extraInfo += `<${subBUrl}|${subB.jobName}> Result: ${subB.result}\n`;
-            });
-            list.push({
-                "key": 'More info',
-                "value": extraInfo
-            });
-        }
-        
-        console.log("To slack:", JSON.stringify(list));
-        slackTalker.sendJobData(servername, list, channel);
+                list.push({
+                    "key": `Last Build : ${data.lastBuild.number}`,
+                    "value": `<${data.lastBuild.url}|Go to Build Page on ${servername}>\nResult: ${lastBuildData.result}`
+                });
+                const timestampRaw = new Date(lastBuildData.timestamp * 1000);
+                let extraInfo = `*Time started*:\n ${timestampRaw.getHours()}:${timestampRaw.getMinutes()}:${timestampRaw.getSeconds()}`;
+
+                if(lastBuildData.subBuilds) {
+                    extraInfo += "\nJobs called by this job:\n";
+                    lastBuildData.subBuilds.forEach(subB => {
+                        const subBUrl = `${instance.getJenkinsBaseUrl()}/${subB.url}`;
+                        extraInfo += `<${subBUrl}|${subB.jobName}> Result: ${subB.result}\n`;
+                    });
+                    list.push({
+                        "key": 'More info',
+                        "value": extraInfo
+                    });
+                }
+                resolve(servername, list, channel);
+            } 
+            catch (err)
+            {
+                reject(err);
+            }
+        });
     }
-
-    
 }
 
 module.exports = new interactive();
