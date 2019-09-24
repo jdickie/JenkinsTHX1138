@@ -11,10 +11,13 @@ const SEARCH_INTENT = 'SEARCH_INTENT';
 class appMention {
     constructor() {}
 
-    processMention(eventJSON) {
+    processMention(eventJSON, respond) {
         const channel = eventJSON.channel,
             user = eventJSON.user;
-        this.determineIntent(eventJSON.text).then(intent => {
+        appMention.determineIntent(eventJSON.text).then(intent => {
+            respond({
+                content: "HI"
+            });
             if (intent === null) {
                 slackTalker.sendTextToChannel(channel, 
                     "Sorry, I didn't understand that.\nLet me get you my instructions...\n\n")
@@ -31,7 +34,7 @@ class appMention {
                         slackTalker.sendTextToChannel("Sorry, didn't find anything", channel, user);
                         return;
                     }
-                    slackTalker.sendJobOptions(data, channel, user)
+                    slackTalker.sendJobOptions(data, channel, user);
                     break;
                 case HELP_INTENT:
                 default:

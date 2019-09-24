@@ -20,7 +20,7 @@ slackEvents.on('url_verification', (event, respond) => {
     });
 })
 // For now, doing this generic error handler
-slackEvents.on('error', (error) => {
+slackEvents.on('error', (error, respond) => {
     console.log('Error: slackEvents', error);
     respond(null, {
         content: "Whoops..."
@@ -59,10 +59,6 @@ slackInteractions.action({
 var app = express();
 var statusRoutes = new status();
 
-// Parsing application/json
-app.use(express.json());
-// Slack has mixed url-form-encoded values and other endpoints with JSON. Enabling x-www-form-urlencoded here
-app.use(express.urlencoded({ extended: true }));
 // for handling Events, including challenges
 app.use('/events', slackEvents.requestListener());
 
@@ -71,5 +67,9 @@ app.get('/status', statusRoutes.getStatus);
 app.use('/interactive', slackInteractions.requestListener());
 
 
+// Parsing application/json
+app.use(express.json());
+// Slack has mixed url-form-encoded values and other endpoints with JSON. Enabling x-www-form-urlencoded here
+app.use(express.urlencoded({ extended: true }));
 app.listen(3000);
 console.log("App ready to go...");
