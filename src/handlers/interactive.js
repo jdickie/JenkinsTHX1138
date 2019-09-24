@@ -35,33 +35,34 @@ class interactive {
                 const jobPath = pieces[2];
 
                 const instance = new jenkinsinstance(servername);
-                const data = await instance.getJobInfo(jobPath); 
-                let list = [];
-                list.push({
-                    "key": "Job",
-                    "value": `*${data.displayName}*`
-                });
-                const lastBuildData = await instance.getBuildInfo(jobPath, data.lastBuild.number);
-
-                list.push({
-                    "key": `Last Build : ${data.lastBuild.number}`,
-                    "value": `<${data.lastBuild.url}|Go to Build Page on ${servername}>\nResult: ${lastBuildData.result}`
-                });
-                const timestampRaw = new Date(lastBuildData.timestamp * 1000);
-                let extraInfo = `*Time started*:\n ${timestampRaw.getHours()}:${timestampRaw.getMinutes()}:${timestampRaw.getSeconds()}`;
-
-                if(lastBuildData.subBuilds) {
-                    extraInfo += "\nJobs called by this job:\n";
-                    lastBuildData.subBuilds.forEach(subB => {
-                        const subBUrl = `${instance.getJenkinsBaseUrl()}/${subB.url}`;
-                        extraInfo += `<${subBUrl}|${subB.jobName}> Result: ${subB.result}\n`;
-                    });
+                instance.getJobInfo(jobPath).then((data) => {
+                    let list = [];
                     list.push({
-                        "key": 'More info',
-                        "value": extraInfo
+                        "key": "Job",
+                        "value": `*${data.displayName}*`
                     });
-                }
-                resolve(servername, list, channel);
+                    instance.getBuildInfo(jobPath, data.lastBuild.number).then((lastBuildData) => {
+                        list.push({
+                            "key": `Last Build : ${data.lastBuild.number}`,
+                            "value": `<${data.lastBuild.url}|Go to Build Page on ${servername}>\nResult: ${lastBuildData.result}`
+                        });
+                        const timestampRaw = new Date(lastBuildData.timestamp * 1000);
+                        let extraInfo = `*Time started*:\n ${timestampRaw.getHours()}:${timestampRaw.getMinutes()}:${timestampRaw.getSeconds()}`;
+        
+                        if(lastBuildData.subBuilds) {
+                            extraInfo += "\nJobs called by this job:\n";
+                            lastBuildData.subBuilds.forEach(subB => {
+                                const subBUrl = `${instance.getJenkinsBaseUrl()}/${subB.url}`;
+                                extraInfo += `<${subBUrl}|${subB.jobName}> Result: ${subB.result}\n`;
+                            });
+                            list.push({
+                                "key": 'More info',
+                                "value": extraInfo
+                            });
+                        }
+                        resolve(servername, list, channel);
+                    }).catch((err) => reject(err));
+                }).catch((err) => reject(err)); 
             } 
             catch (err)
             {

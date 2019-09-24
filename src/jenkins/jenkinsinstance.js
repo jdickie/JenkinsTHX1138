@@ -93,7 +93,6 @@ class jenkinsinstance {
             console.log(`Checking job info for ${jobPath}`);
             self.jenkinsInstance.job.get(jobPath, function(err, data) {
                 if (err) {
-                    console.log("Error", err);
                     reject(err);
                 }
                 resolve(data);

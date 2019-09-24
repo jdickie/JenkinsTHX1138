@@ -1,5 +1,4 @@
 const express = require('express');
-const eventRoutes = require(__dirname + "/src/routes/event");
 const status = require(__dirname + "/src/routes/status");
 const interactive = require(__dirname + "/src/routes/interactive");
 const appMention = require(`${__dirname}/src/handlers/appMention`);
@@ -10,12 +9,22 @@ const SIGNING_SECRET = Config.get('slack.signing');
 
 // Creating event adapter with signing secret
 // @see https://github.com/slackapi/node-slack-sdk
-const slackEvents = createEventAdapter(SIGNING_SECRET);
+const slackEvents = createEventAdapter(SIGNING_SECRET, {
+    waitForResponse: true
+});
 slackEvents.on('app_mention', appMention.processMention);
-slackEvents.on('challenge')
+slackEvents.on('url_verification', (event, respond) => {
+    console.log(event);
+    respond(null, {
+        content: event.challenge
+    });
+})
 // For now, doing this generic error handler
 slackEvents.on('error', (error) => {
     console.log('Error: slackEvents', error);
+    respond(null, {
+        content: "Whoops..."
+    });
 });
 
 // Slack interaction handler
@@ -23,6 +32,9 @@ const slackInteractions = createMessageAdapter(SIGNING_SECRET);
 slackInteractions.action({
     actionId: 'pickajob'
 }, (payload, respond) => {
+    respond(null, {
+        content: "Fetching..."
+    })
     const channel = payload.channel.id,
         actions = payload.actions;
         // Determine action from action_id, then process    
@@ -52,7 +64,7 @@ app.use(express.json());
 // Slack has mixed url-form-encoded values and other endpoints with JSON. Enabling x-www-form-urlencoded here
 app.use(express.urlencoded({ extended: true }));
 // for handling Events, including challenges
-app.use('/events', slackEvents.expressMiddleware());
+app.use('/events', slackEvents.requestListener());
 
 // Handles liveness and readiness probes for k8s
 app.get('/status', statusRoutes.getStatus);
