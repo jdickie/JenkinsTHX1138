@@ -18,7 +18,8 @@ class helpMessage {
     constructor() {}
 
     helpMessage(channel) {
-        slackTalker.sendTextWithFieldsToChannel(channel, "Here are a list of available commands:", availableCommands);
+        console.log("Calling helpmessages");
+        slackTalker.sendTextWithFieldsToUser(channel, "Here are a list of available commands:", availableCommands);
     }
 }
 

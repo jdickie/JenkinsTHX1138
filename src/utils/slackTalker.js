@@ -20,28 +20,12 @@ class slackTalker {
         }
         if (user) {
             message.user = user;
-            web.chat.postEphemeral(message);
+            console.log("Sending ephemeral ", message);
+            await web.chat.postEphemeral(message);
         } else {
-            web.chat.postMessage(message);
+            console.log('sending post', message);
+            await web.chat.postMessage(message);
         }
-    }
-
-    sendMessage(message, url, token) {
-        console.log(`Sending to ${url}`);
-        return rp({
-            url: url,
-            method: "POST",
-            json: true,
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json; charset=utf-8'
-            },
-            body: message
-        }).then(function(response) {
-            console.log("info", response);
-        }).catch(function(err) {
-            console.log("Error", err);
-        });
     }
 
     sendTextToChannel(channel, text) {
@@ -51,14 +35,15 @@ class slackTalker {
         });
     }
 
-    sendTextWithFieldsToChannel(channel, text, fields) {
+    sendTextWithFieldsToUser(user, text, fields) {
         let message = {
-            text: text
+            text: text,
+            user: user,
+            icon_emoji: ':jenkins_devil:'
         }
         message.blocks = [];
         message.blocks.push(this.createSection(text, fields));
-        console.log('info', JSON.stringify(message));
-        this.sendMessageToChannel(channel, message);
+        this.sendMessageToChannel(user, message, user);
     }
 
     sendJobOptions(data, channel, user) {

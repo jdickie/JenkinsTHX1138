@@ -8,16 +8,17 @@ const helpRegex = /\bhelp\b/;
 const LIST_INTENT = "LIST_INTENT";
 const HELP_INTENT = 'HELP_INTENT';
 const SEARCH_INTENT = 'SEARCH_INTENT';
+let self = null;
 class appMention {
-    constructor() {}
+    constructor() {
+        self = this;
+    }
 
     processMention(eventJSON, respond) {
         const channel = eventJSON.channel,
             user = eventJSON.user;
-        appMention.determineIntent(eventJSON.text).then(intent => {
-            respond({
-                content: "HI"
-            });
+        self.determineIntent(eventJSON.text).then((intent) => {
+            console.log('intent', intent);
             if (intent === null) {
                 slackTalker.sendTextToChannel(channel, 
                     "Sorry, I didn't understand that.\nLet me get you my instructions...\n\n")
@@ -41,39 +42,44 @@ class appMention {
                     helpMessage.helpMessage(channel);
                     break;
             }
-        }).catch(err => console.log('Error', err));
+        }).catch(err => {
+            console.log('Error', err);
+            helpMessage.helpMessage(user);
+        });
     }
 
-    async determineIntent(userMessage) {
-        let results = userMessage.match(jobListRegex);
-        if (results !== null && results.length) {
-            const instance = new jenkinsinstance(results[1]);
-            if (instance === null) {
-                console.log("Jenkinsinstance returned null");
-                return null;
+    determineIntent(userMessage) {
+        return new Promise((respond, reject) => {
+            let results = userMessage.match(jobListRegex);
+            if (results !== null && results.length) {
+                const instance = new jenkinsinstance(results[1]);
+                if (instance === null) {
+                    console.log("Jenkinsinstance returned null");
+                    reject("No intent found");
+                }
+                instance.getServerJobList().then((jobData) => {
+                    respond({
+                        intent: LIST_INTENT,
+                        servername: results[1],
+                        data: jobData
+                    });
+                }).catch(err => reject(err));
             }
-            const jobData = await instance.getServerJobList();
-            console.log('info', jobData);
-            return {
-                intent: LIST_INTENT,
-                servername: results[1],
-                data: jobData
+            results = userMessage.match(jobSearchRegex);
+            if (results !== null && results.length) {
+                respond({
+                    intent: SEARCH_INTENT,
+                    jobToFind: results[2]
+                });
             }
-        }
-        results = userMessage.match(jobSearchRegex);
-        if (results !== null && results.length) {
-            return {
-                intent: SEARCH_INTENT,
-                jobToFind: results[2]
+            results = userMessage.match(helpRegex);
+            if (results !== null && results.length) {
+                respond({
+                    intent: HELP_INTENT
+                });
             }
-        }
-        results = userMessage.match(helpRegex);
-        if (results !== null && results.length) {
-            return {
-                intent: HELP_INTENT
-            }
-        }
-        return null;
+            reject("No intent found");
+        });
     }
 
 

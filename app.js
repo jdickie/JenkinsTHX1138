@@ -14,7 +14,6 @@ const slackEvents = createEventAdapter(SIGNING_SECRET, {
 });
 slackEvents.on('app_mention', appMention.processMention);
 slackEvents.on('url_verification', (event, respond) => {
-    console.log(event);
     respond(null, {
         content: event.challenge
     });
