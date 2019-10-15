@@ -8,6 +8,7 @@ class jenkinsinstance {
      */
     constructor(name) {
         try {
+            console.log(`Calling jenkinsinstance ${name}`);
             this.hostname = Config.get(`jenkins.servers.${name}.hostname`);
             const user = Config.get(`jenkins.servers.${name}.user`);
             const password = Config.get(`jenkins.servers.${name}.password`);
@@ -40,14 +41,14 @@ class jenkinsinstance {
     /**
      * Return back a list of keyword-named jobs that are set up in the config.
      */
-    async getServerJobList() {
+    getServerJobList() {
         const self = this;
         let list = [];
         var jobs = Config.get(`jenkins.jobs`);
         for (const job of jobs) {
             if (job.server === self.serverName) {
                 list.push({
-                    key: `Server: ${job.server}\nEnvironment: ${job.env}\nName: ${job.displayName}`,
+                    key: `${job.env} - ${job.displayName}`,
                     value: job.path,
                     server: job.server
                 });
@@ -90,7 +91,6 @@ class jenkinsinstance {
     getJobInfo(jobPath) {
         var self = this;
         return new Promise(function(resolve, reject) {
-            console.log(`Checking job info for ${jobPath}`);
             self.jenkinsInstance.job.get(jobPath, function(err, data) {
                 if (err) {
                     reject(err);

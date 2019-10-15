@@ -17,9 +17,12 @@ const availableCommands = [
 class helpMessage {
     constructor() {}
 
-    helpMessage(channel) {
-        console.log("Calling helpmessages");
-        slackTalker.sendTextWithFieldsToUser(channel, "Here are a list of available commands:", availableCommands);
+    helpMessage(channel, user) {
+        slackTalker.sendTextWithFieldsToUser({
+            channel: channel, 
+            user: user, 
+            text: "Here are a list of available commands:", 
+            fields: availableCommands});
     }
 }
 

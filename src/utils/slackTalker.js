@@ -20,10 +20,8 @@ class slackTalker {
         }
         if (user) {
             message.user = user;
-            console.log("Sending ephemeral ", message);
             await web.chat.postEphemeral(message);
         } else {
-            console.log('sending post', message);
             await web.chat.postMessage(message);
         }
     }
@@ -35,15 +33,14 @@ class slackTalker {
         });
     }
 
-    sendTextWithFieldsToUser(user, text, fields) {
+    sendTextWithFieldsToUser(opts) {
         let message = {
-            text: text,
-            user: user,
-            icon_emoji: ':jenkins_devil:'
+            text: opts.text,
+            user: opts.user
         }
         message.blocks = [];
-        message.blocks.push(this.createSection(text, fields));
-        this.sendMessageToChannel(user, message, user);
+        message.blocks.push(this.createSection(opts.text, opts.fields));
+        this.sendMessageToChannel(opts.channel, message, opts.user);
     }
 
     sendJobOptions(data, channel, user) {

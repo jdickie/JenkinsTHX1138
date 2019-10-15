@@ -9,9 +9,7 @@ const SIGNING_SECRET = Config.get('slack.signing');
 
 // Creating event adapter with signing secret
 // @see https://github.com/slackapi/node-slack-sdk
-const slackEvents = createEventAdapter(SIGNING_SECRET, {
-    waitForResponse: true
-});
+const slackEvents = createEventAdapter(SIGNING_SECRET);
 slackEvents.on('app_mention', appMention.processMention);
 slackEvents.on('url_verification', (event, respond) => {
     respond(null, {
@@ -22,7 +20,8 @@ slackEvents.on('url_verification', (event, respond) => {
 slackEvents.on('error', (error, respond) => {
     console.log('Error: slackEvents', error);
     respond(null, {
-        content: "Whoops..."
+        content: "Whoops...",
+       icon_emoji: ':jenkins_devil:'
     });
 });
 

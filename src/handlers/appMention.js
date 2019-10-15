@@ -18,7 +18,6 @@ class appMention {
         const channel = eventJSON.channel,
             user = eventJSON.user;
         self.determineIntent(eventJSON.text).then((intent) => {
-            console.log('intent', intent);
             if (intent === null) {
                 slackTalker.sendTextToChannel(channel, 
                     "Sorry, I didn't understand that.\nLet me get you my instructions...\n\n")
@@ -39,12 +38,12 @@ class appMention {
                     break;
                 case HELP_INTENT:
                 default:
-                    helpMessage.helpMessage(channel);
+                    helpMessage.helpMessage(channel, user);
                     break;
             }
         }).catch(err => {
             console.log('Error', err);
-            helpMessage.helpMessage(user);
+            helpMessage.helpMessage(channel, user);
         });
     }
 
@@ -57,13 +56,12 @@ class appMention {
                     console.log("Jenkinsinstance returned null");
                     reject("No intent found");
                 }
-                instance.getServerJobList().then((jobData) => {
-                    respond({
-                        intent: LIST_INTENT,
-                        servername: results[1],
-                        data: jobData
-                    });
-                }).catch(err => reject(err));
+                const jobData = instance.getServerJobList();
+                respond({
+                    intent: LIST_INTENT,
+                    servername: results[1],
+                    data: jobData
+                });
             }
             results = userMessage.match(jobSearchRegex);
             if (results !== null && results.length) {
